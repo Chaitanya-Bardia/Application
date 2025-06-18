@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Sending Progress</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Same CSS as before, unchanged */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            width: 100%;
+            max-width: 800px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        
+        .progress-container {
+            background-color: #ecf0f1;
+            width: 100%;
+            height: 40px;
+            margin-top: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            text-align: center;
+            line-height: 40px;
+            color: white;
+            font-weight: bold;
+            border-radius: 20px;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 3px 10px rgba(0, 114, 255, 0.4);
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            padding: 0 10px;
+        }
+        
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 15px;
+            flex: 1;
+            margin: 0 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .completion-message {
+            background: #e8f4fd;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            margin: 25px 0;
+            border-radius: 8px;
+            text-align: center;
+            color: #2c3e50;
+            display: none;
+        }
+        
+        .btn {
+            background: linear-gradient(90deg, #00b09b, #96c93d);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 176, 155, 0.4);
+            font-weight: bold;
+            display: none;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 176, 155, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .progress-info {
+            margin: 25px 0;
+            font-size: 1.2rem;
+            color: #2c3e50;
+        }
+        
+        .count {
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: #e74c3c;
+        }
+        
+        .logo {
+            margin-bottom: 20px;
+        }
+        
+        .logo svg {
+            width: 80px;
+            height: 80px;
+            fill: #3498db;
+        }
+        
+        .animation-container {
+            margin: 30px 0;
+            height: 80px;
+            position: relative;
+        }
+        
+        .mail-icon {
+            font-size: 3rem;
+            color: #3498db;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-15px); }
+        }
+        
+        .complete-animation {
+            font-size: 4rem;
+            color: #2ecc71;
+            margin: 20px 0;
+            display: none;
+            animation: bounce 1s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-30px);}
+            60% {transform: translateY(-15px);}
+        }
+        
+        .loading-dots {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: #3498db;
+            border-radius: 50%;
+            margin: 0 5px;
+            animation: pulse 1.5s infinite;
+        }
+        
+        .dot:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+        
+        .dot:nth-child(3) {
+            animation-delay: 1s;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.7; }
+        }
+        
+        .email-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 20px 0;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .email-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .email-item:last-child {
+            border-bottom: none;
+        }
+        
+        .email-status {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .sent .email-status {
+            color: #2ecc71;
+        }
+        
+        .pending .email-status {
+            color: #f39c12;
+        }
+        
+        .countdown {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-top: 15px;
+        }
+        
+        .countdown-number {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 1.5rem;
+            margin: 0 5px;
+        }
+        
+        @media (max-width: 500px) {
+            .container {
+                padding: 25px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+            
+            .stat-box {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <i class="fas fa-paper-plane" style="font-size: 4rem; color: #3498db;"></i>
+        </div>
+        
+        <h1>Email Sending Progress</h1>
+        <p class="subtitle">Real-time tracking of your email campaign</p>
+        
+        <div class="progress-info">
+            Emails Sent: <span id="progress" class="count">0</span> of <span id="total" class="count">0</span>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar" style="width: 0%;">0%</div>
+        </div>
+        
+        <div class="animation-container">
+            <div class="mail-icon">✉️</div>
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Emails Sent</div>
+                <div id="sent-count" class="stat-value">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Remaining</div>
+                <div id="remaining-count" class="stat-value">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Completion</div>
+                <div id="percentage" class="stat-value">0%</div>
+            </div>
+        </div>
+        
+        <div id="email-list" class="email-list">
+            <!-- Email items will be added dynamically -->
+        </div>
+        
+        <div id="completion-message" class="completion-message">
+            <p><i class="fas fa-check-circle"></i> All emails have been successfully sent! 🎉</p>
+        </div>
+        
+        <div id="complete-animation" class="complete-animation">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        
+        <div id="countdown" class="countdown">
+            Redirecting to home page in <span id="countdown-number" class="countdown-number">5</span> seconds...
+        </div>
+        
+        <button id="send-more-btn" class="btn">Send More Emails Now</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress');
+            const totalText = document.getElementById('total');
+            const sentCount = document.getElementById('sent-count');
+            const remainingCount = document.getElementById('remaining-count');
+            const percentageText = document.getElementById('percentage');
+            const completionMessage = document.getElementById('completion-message');
+            const sendMoreBtn = document.getElementById('send-more-btn');
+            const completeAnimation = document.getElementById('complete-animation');
+            const loadingDots = document.querySelector('.loading-dots');
+            const mailIcon = document.querySelector('.mail-icon');
+            const emailList = document.getElementById('email-list');
+            const countdown = document.getElementById('countdown');
+            const countdownNumber = document.getElementById('countdown-number');
+            
+            // Get emails from session storage
+            const storedEmails = sessionStorage.getItem('emailList');
+            const emails = storedEmails ? JSON.parse(storedEmails) : [];
+            const totalEmails = emails.length;
+            
+            totalText.textContent = totalEmails;
+            sentCount.textContent = '0';
+            remainingCount.textContent = totalEmails;
+            percentageText.textContent = '0%';
+            
+            // Create email list items
+            emails.forEach(email => {
+                const emailItem = document.createElement('div');
+                emailItem.className = 'email-item pending';
+                emailItem.innerHTML = `
+                    <span class="email-status"><i class="fas fa-clock"></i></span>
+                    <span class="email-address">${email}</span>
+                `;
+                emailList.appendChild(emailItem);
+            });
+            
+            // Variables for progress
+            let emailsSent = 0;
+            let countdownInterval;
+            let redirectCountdown = 5;
+            
+            // Function to simulate sending emails
+            function sendNextEmail() {
+                if (emailsSent < totalEmails) {
+                    // Simulate email sending delay (0.1s to 0.8s)
+                    const delay = Math.random() * 700 + 100;
+                    
+                    setTimeout(() => {
+                        emailsSent++;
+                        updateProgress(emailsSent, totalEmails);
+                        
+                        // Update the email item status
+                        const emailItems = document.querySelectorAll('.email-item');
+                        if (emailItems[emailsSent-1]) {
+                            emailItems[emailsSent-1].className = 'email-item sent';
+                            emailItems[emailsSent-1].innerHTML = `
+                                <span class="email-status"><i class="fas fa-check-circle"></i></span>
+                                <span class="email-address">${emails[emailsSent-1]}</span>
+                            `;
+                        }
+                        
+                        // Continue sending next email
+                        sendNextEmail();
+                    }, delay);
+                } else {
+                    // All emails sent
+                    showCompletion();
+                }
+            }
+            
+            function updateProgress(sent, total) {
+                const percentage = Math.round((sent / total) * 100);
+                
+                // Update UI elements
+                progressText.textContent = sent;
+                sentCount.textContent = sent;
+                remainingCount.textContent = total - sent;
+                percentageText.textContent = `${percentage}%`;
+                progressBar.style.width = `${percentage}%`;
+                progressBar.textContent = `${percentage}%`;
+            }
+            
+            function showCompletion() {
+                // Show completion elements
+                setTimeout(() => {
+                    loadingDots.style.display = 'none';
+                    mailIcon.style.display = 'none';
+                    completeAnimation.style.display = 'block';
+                    completionMessage.style.display = 'block';
+                    countdown.style.display = 'block';
+                    
+                    // Start countdown
+                    countdownInterval = setInterval(() => {
+                        redirectCountdown--;
+                        countdownNumber.textContent = redirectCountdown;
+                        
+                        if (redirectCountdown <= 0) {
+                            clearInterval(countdownInterval);
+                            redirectToHome();
+                        }
+                    }, 1000);
+                    
+                    // Show button
+                    sendMoreBtn.style.display = 'inline-block';
+                }, 1000);
+            }
+            
+            function redirectToHome() {
+                // Redirect to home page
+                window.location.href = "/";
+            }
+            
+            // Button click handler
+            sendMoreBtn.addEventListener('click', function() {
+                clearInterval(countdownInterval);
+                redirectToHome();
+            });
+            
+            // Start sending emails
+            if (totalEmails > 0) {
+                sendNextEmail();
+            } else {
+                // Handle case with no emails
+                progressText.textContent = "0";
+                totalText.textContent = "0";
+                sentCount.textContent = "0";
+                remainingCount.textContent = "0";
+                percentageText.textContent = "0%";
+                progressBar.style.width = "0%";
+                progressBar.textContent = "0%";
+                
+                // Show error message
+                const errorMessage = document.createElement('div');
+                errorMessage.className = 'completion-message';
+                errorMessage.style.display = 'block';
+                errorMessage.style.backgroundColor = '#fde8e8';
+                errorMessage.style.borderLeftColor = '#e74c3c';
+                errorMessage.innerHTML = `<p><i class="fas fa-exclamation-circle"></i> No emails to send! Please add email addresses.</p>`;
+                document.querySelector('.container').insertBefore(errorMessage, sendMoreBtn);
+                
+                sendMoreBtn.style.display = 'inline-block';
+            }
+        });
+    </script>
+</body>
+</html>

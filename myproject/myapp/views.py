@@ -1,27 +1,87 @@
-from django.shortcuts import render
-from django.http import JsonResponse
-from .tasks import send_bulk_email
+# views.py
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+from myapp.tasks import send_bulk_email
 import json
 
-def home(request):
-    return render(request, 'home.html')
-
+@api_view(["POST"])
 def start_sending_email(request):
-    # Get emails from the POST request
-    emails = request.body.decode('utf-8')
-    
-    # Receive the list of emails
-    emails_list = json.loads(emails).get('emails') 
-    
-    # Parse emails from the body
-    if not emails_list:
-        return JsonResponse({"error": "No emails provided."}, status=400)
+    """
+    Expected payload: {"emails": ["email1@example.com", "email2@example.com"]}
+    """
+    try:
+        emails_list = request.data.get('emails', [])
+        
+        if not emails_list:
+            return Response(
+                {"error": "No emails provided.", "success": False}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not isinstance(emails_list, list):
+            return Response(
+                {"error": "Emails must be provided as a list.", "success": False}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate email format
+        valid_emails = []
+        for email in emails_list:
+            email = email.strip()
+            if email and '@' in email:
+                valid_emails.append(email)
+        
+        if not valid_emails:
+            return Response(
+                {"error": "No valid emails provided.", "success": False}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Start sending emails asynchronously using Celery
+        task = send_bulk_email.apply_async(args=[valid_emails])
+        
+        return Response({
+            "success": True,
+            "message": "Email sending task started successfully",
+            "task_id": task.id,
+            "total_emails": len(valid_emails),
+            "valid_emails": valid_emails
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response(
+            {"error": f"An error occurred: {str(e)}", "success": False}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-    # Start sending emails asynchronously using Celery
-    send_bulk_email.apply_async(args=[emails_list])
+@api_view(["GET"])
+def get_email_status(request):
+    """
+    API endpoint to get the current status of email sending
+    This can be used to check if any email sending is in progress
+    """
+    try:
 
-    # Return response indicating the task is started
-    return JsonResponse({"status": "Mail sending task started"})
+        return Response({
+            "success": True,
+            "message": "Email status retrieved successfully",
+            "status": "Use WebSocket connection for real-time updates"
+        }, status=status.HTTP_200_OK)
+        
+    except Exception as e:
+        return Response(
+            {"error": f"An error occurred: {str(e)}", "success": False}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
-def count_page(request):
-    return render(request, 'count_page.html', {'total_emails': 0}) #initially no mails sent,hence we will pass 0 in total mails
+@api_view(["GET"])
+def health_check(request):
+    """
+    API endpoint for health check
+    """
+    return Response({
+        "success": True,
+        "message": "Email service is running",
+        "status": "healthy"
+    }, status=status.HTTP_200_OK)

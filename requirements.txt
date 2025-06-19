@@ -1,4 +1,8 @@
 Django==5.0.3
 djangorestframework==3.14.0
-redis
-celery
+django-cors-headers==4.3.1
+celery==5.3.4
+redis==5.0.1
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0

@@ -1,1 +1,65 @@
-/env
+# Python bytecode files
+*.pyc
+*.pyo
+__pycache__/
+
+# Django migrations
+*/migrations/*
+
+# Database files
+*.sqlite3
+db.sqlite3
+
+# Django secret keys
+*.env
+.env
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+
+# macOS files
+.DS_Store
+
+# Windows files
+Thumbs.db
+
+# Test coverage
+.coverage
+*.coveragerc
+
+# Log files
+*.log
+
+# Virtual environment
+venv/
+env/
+*/env/
+*/venv/
+
+# Pipenv
+Pipfile.lock
+
+# Django static files
+/staticfiles/
+
+# Media files
+/media/
+
+# MySQL
+*.sql
+
+# Caches
+*.cache
+
+# Distribution files
+*.tar.gz
+*.zip
+*.egg
+*.whl
+
+# Docker
+*.docker
+docker-compose.override.yml

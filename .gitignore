@@ -1,5 +1,6 @@
 # Python bytecode files
 *.pyc
+.pyc
 *.pyo
 __pycache__/
 

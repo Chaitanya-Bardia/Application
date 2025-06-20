@@ -6,7 +6,7 @@ export const useEmailProgress = () => {
     const socketRef = useRef(null)
 
     useEffect(()=>{
-        socketRef.current = new WebSocket('ws://localhost:8080/ws/progress')
+        socketRef.current = new WebSocket('ws://localhost:8000/ws/progress')
         socketRef.current.onopen = () =>{
             setConnected(true);
             console.log("Connected to WebSocket server");

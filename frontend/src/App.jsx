@@ -1,12 +1,12 @@
-import './App.css'
+import "./App.css";
+import SendEmail from "./components/SendEmail";
 
 function App() {
-
   return (
     <>
-      <div>Hello</div>
+      <SendEmail />
     </>
-  )
+  );
 }
 
-export default App
+export default App;

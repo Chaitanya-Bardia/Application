@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useEmailProgress } from "../hooks/useEmailProgress";
 import axios from "axios";
-import axiosInstance from "../api/axiosInstance";
 
 const SendEmail = () => {
   const [emailInput, setEmailInput] = useState("");
   const [serverResponse, setServerResponse] = useState(null);
-  const { progress, connected } = useEmailProgress();
+  const { progress, connected, error, reconnect, disconnect } = useEmailProgress();
 
   const handleStartEmail = async () => {
     const emails = emailInput.split(",").map((email) => email.trim());
@@ -49,10 +48,29 @@ const SendEmail = () => {
       <hr />
 
       <h3>📊 Progress</h3>
-      <p>WebSocket: {connected ? "Connected ✅" : "Disconnected ❌"}</p>
+      <div style={{ marginBottom: "1rem" }}>
+        <p>WebSocket: {connected ? "Connected ✅" : "Disconnected ❌"}</p>
+        {error && <p style={{ color: "red" }}>Error: {error}</p>}
+        {!connected && (
+          <button onClick={reconnect} style={{ marginRight: "10px" }}>
+            Reconnect
+          </button>
+        )}
+        {connected && (
+          <button onClick={disconnect}>
+            Disconnect
+          </button>
+        )}
+      </div>
       <p>
-        Sent: {progress?.emails_sent} / {progress?.total_emails}
+        Sent: {progress?.emails_sent || 0} / {progress?.total_emails || 0}
       </p>
+      {progress?.current_email && (
+        <p>Current: {progress.current_email}</p>
+      )}
+      {progress?.status && (
+        <p>Status: {progress.status}</p>
+      )}
     </div>
   );
 };
